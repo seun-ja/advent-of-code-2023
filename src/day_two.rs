@@ -8,12 +8,67 @@ pub fn solve_day_2() {
         game.insert(index + 1, record_secrets(line));
     }
 
-    let value = sum_possibility(game);
+    let value = sum_possibility(&game);
+    let multiples = power_of_set(game);
 
-    println!("{value}")
+    println!("Day Two Answer");
+    println!("{value}");
+    println!("{multiples}")
 }
 
-fn sum_possibility(game: HashMap<usize, Vec<GameSet>>) -> u16 {
+fn power_of_set(game: HashMap<usize, Vec<GameSet>>) -> u64 {
+    let mut multiples: Vec<u16> = Vec::new();
+
+    for (_index, sets) in game.into_iter() {
+        let mut red_set = GameSet {
+            colour: Colour::Red,
+            amount: 0,
+        };
+
+        let mut blue_set = GameSet {
+            colour: Colour::Blue,
+            amount: 0,
+        };
+
+        let mut green_set = GameSet {
+            colour: Colour::Green,
+            amount: 0,
+        };
+
+        for set in sets {
+            match set.colour {
+                Colour::Blue => {
+                    if set.amount > blue_set.amount {
+                        blue_set.amount = set.amount
+                    }
+                }
+                Colour::Green => {
+                    if set.amount > green_set.amount {
+                        green_set.amount = set.amount
+                    }
+                }
+                Colour::Red => {
+                    if set.amount > red_set.amount {
+                        red_set.amount = set.amount
+                    }
+                }
+            }
+        }
+
+        let multiple = red_set.amount * blue_set.amount * green_set.amount;
+
+        multiples.push(multiple);
+    }
+
+    let mut value: u64 = 0;
+    for digit in multiples {
+        value += digit as u64
+    }
+
+    value
+}
+
+fn sum_possibility(game: &HashMap<usize, Vec<GameSet>>) -> u16 {
     let bag = bag();
 
     let mut game_list: Vec<u16> = Vec::new();
@@ -24,22 +79,22 @@ fn sum_possibility(game: HashMap<usize, Vec<GameSet>>) -> u16 {
 
     let mut possible_games: Vec<u16> = Vec::new();
 
-    for (i, sets) in game.into_iter() {
+    for (i, sets) in game.iter() {
         for set in sets {
             match set.colour {
                 Colour::Blue => {
                     if set.amount > bag[0].amount {
-                        possible_games.push(i as u16)
+                        possible_games.push(*i as u16)
                     }
                 }
                 Colour::Green => {
                     if set.amount > bag[1].amount {
-                        possible_games.push(i as u16)
+                        possible_games.push(*i as u16)
                     }
                 }
                 Colour::Red => {
                     if set.amount > bag[2].amount {
-                        possible_games.push(i as u16)
+                        possible_games.push(*i as u16)
                     }
                 }
             }
@@ -67,7 +122,6 @@ fn sum_possibility(game: HashMap<usize, Vec<GameSet>>) -> u16 {
     value
 }
 
-// Game 2: 20 blue, 12 green, 2 red; 1 red, 2 green, 20 blue; 1 red, 14 green, 17 blue; 7 green, 17 blue
 fn record_secrets(cube_sets: &str) -> Vec<GameSet> {
     let game_data = game_number(cube_sets);
 
